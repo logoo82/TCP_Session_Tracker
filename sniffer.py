@@ -89,15 +89,27 @@ def main(filter):
                     ack = pkt[TCP].ack
                     flags = pkt[TCP].flags
                     payload_len = len(pkt[TCP].payload)
+                    window = pkt[TCP].window
+                    
+                    raw_flags = str(pkt[TCP].flags)
+                    flag_string = {'S':'SYN', 'A':'ACK', 'F':'FIN', 'R':"RST", 'P':'PSH', 'U':'URG'}
+                    readable_flags = []
+                    for char in raw_flags:
+                        readable_flags.append(flag_string[char])
+                        
+                    flags_str = "/".join(readable_flags) if readable_flags else None
+                    
+                    extra_info = f" | Win: {window} | Flags: {flags_str}"
                     
                     if 'S' in flags:
-                        print(f"[SYN SEQ: {seq}:{seq+1}]")
+                        print(f"[SYN SEQ: {seq}:{seq+1}]{extra_info}")
                     elif 'F' in flags:
-                        print(f"[FIN SEQ: {seq}:{seq+1}]")
+                        print(f"[FIN SEQ: {seq}:{seq+1}]{extra_info}")
                     elif payload_len > 0:
-                        print(f"[SEQ: {seq}:{seq+payload_len}]")
+                        print(f"[SEQ: {seq}:{seq+payload_len}]{extra_info}")
                     elif 'A' in flags:
-                        print(f"[ACK: {ack}]")
+                        print(f"[ACK: {ack}]{extra_info}")
+                                    
             else:
                 print("Invalid Session ID")
         except ValueError:
